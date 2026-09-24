@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-from app.shared.exceptions import LectureNotFoundError
+from app.core.error import LectureNotFoundError
 
 from .domain import Lecture, LectureStatus, TargetLanguage
 from .repository import LectureRepository

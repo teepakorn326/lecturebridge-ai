@@ -2,7 +2,11 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.modules.lectures.router import router as lecture_router
-from app.shared.exceptions import LectureNotFoundError
+from app.core.error import LectureNotFoundError
+
+from app.modules.ingestion.router import (
+    router as ingestion_router,
+)
 
 
 app = FastAPI(
@@ -35,3 +39,8 @@ async def lecture_not_found_handler(
             "detail": str(exc)
         },
     )
+
+app.include_router(
+    ingestion_router,
+    prefix="/api/v1",
+)

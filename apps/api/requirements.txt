@@ -3,3 +3,7 @@ uvicorn[standard]
 pydantic
 pytest
 httpx
+
+python-multipart
+pymupdf
+python-pptx

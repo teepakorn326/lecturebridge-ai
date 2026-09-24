@@ -1,0 +1,1 @@
+Self-attention allows a model to determine which words in a sequence are important to each other.

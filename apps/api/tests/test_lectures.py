@@ -50,3 +50,4 @@ def test_get_missing_lecture():
     )
 
     assert response.status_code == 404
+
