@@ -7,3 +7,5 @@ httpx
 python-multipart
 pymupdf
 python-pptx
+openai
+pydantic-settings
