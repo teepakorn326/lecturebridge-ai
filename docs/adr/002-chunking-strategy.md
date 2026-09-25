@@ -37,3 +37,29 @@ The default configuration is:
 max_chars = 1200
 overlap_chars = 150
 ```
+
+## Alternatives Considered
+
+### Token-based chunking
+
+Rejected for MVP: requires a tokenizer dependency, output varies by
+tokenizer version → harder to keep tests deterministic. Revisit when
+we tune retrieval with evals.
+
+### Semantic chunking (split by meaning/topic boundaries)
+
+Rejected for MVP: needs an embedding/LLM call per document → cost,
+latency, and nondeterminism in the ingestion path. The Strategy
+pattern in ChunkingService keeps the door open.
+
+### One chunk per segment (no merge/split)
+
+Rejected: PDF pages overflow prompt budgets; VTT cues are too small
+to carry meaning. See Day 3 notes.
+
+## Consequences
+
+- Deterministic, dependency-free, fully unit-tested chunking
+- Chunk boundaries may still cut mid-sentence (mitigated by overlap)
+- max_chars/overlap_chars are config, tunable per retrieval evals
+- Swapping strategy later = new class behind the same interface
