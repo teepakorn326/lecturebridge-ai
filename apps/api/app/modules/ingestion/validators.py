@@ -9,9 +9,7 @@ ALLOWED_EXTENSIONS = {
 }
 
 
-MAX_FILE_SIZE = (
-    50 * 1024 * 1024
-)
+MAX_FILE_SIZE = 50 * 1024 * 1024
 
 
 class UnsupportedFileTypeError(Exception):
@@ -26,14 +24,10 @@ def validate_filename(
     filename: str,
 ) -> None:
 
-    extension = Path(
-        filename
-    ).suffix.lower()
+    extension = Path(filename).suffix.lower()
 
     if extension not in ALLOWED_EXTENSIONS:
-        raise UnsupportedFileTypeError(
-            f"Unsupported file type: {extension}"
-        )
+        raise UnsupportedFileTypeError(f"Unsupported file type: {extension}")
 
 
 def validate_file_size(
@@ -41,7 +35,4 @@ def validate_file_size(
 ) -> None:
 
     if file_size > MAX_FILE_SIZE:
-        raise FileTooLargeError(
-            "File exceeds the 50 MB limit"
-        )
-
+        raise FileTooLargeError("File exceeds the 50 MB limit")

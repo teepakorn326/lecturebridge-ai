@@ -3,16 +3,13 @@ from .domain import Chunk, Citation
 
 
 class ChunkingService:
-
     def __init__(
         self,
         max_chars: int = 1200,
         overlap_chars: int = 150,
     ):
         if overlap_chars >= max_chars:
-                    raise ValueError(
-                        "overlap_chars must be smaller than max_chars"
-                    )
+            raise ValueError("overlap_chars must be smaller than max_chars")
         self.max_chars = max_chars
         self.overlap_chars = overlap_chars
 
@@ -28,7 +25,8 @@ class ChunkingService:
             slide_number=segment.slide_number,
             timestamp_start=segment.timestamp_start,
             timestamp_end=segment.timestamp_end,
-        )    
+        )
+
     def chunk_document(
         self,
         document: CanonicalDocument,
@@ -61,9 +59,8 @@ class ChunkingService:
         for segment in document.segments:
             citation = self._citation_from(document, segment)
 
-            
             if len(segment.text) > self.max_chars:
-                flush()  
+                flush()
                 for piece in self._split_long_text(segment.text):
                     chunks.append(
                         Chunk(
@@ -73,7 +70,6 @@ class ChunkingService:
                         )
                     )
                 continue
-
 
             if buffer_len + len(segment.text) > self.max_chars:
                 flush()
@@ -85,7 +81,7 @@ class ChunkingService:
         flush()
 
         return chunks
-    
+
     def _split_long_text(
         self,
         text: str,
@@ -94,6 +90,5 @@ class ChunkingService:
         step = self.max_chars - self.overlap_chars
 
         return [
-            text[start : start + self.max_chars]
-            for start in range(0, len(text), step)
+            text[start : start + self.max_chars] for start in range(0, len(text), step)
         ]

@@ -27,9 +27,7 @@ class Segment:
     timestamp_start: float | None = None
     timestamp_end: float | None = None
 
-    metadata: dict[str, Any] = field(
-        default_factory=dict
-    )
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(slots=True)

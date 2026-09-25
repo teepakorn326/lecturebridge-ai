@@ -8,7 +8,6 @@ from .repository import LectureRepository
 
 
 class LectureService:
-
     def __init__(self, repository: LectureRepository):
         self.repository = repository
 

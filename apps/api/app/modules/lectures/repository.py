@@ -5,16 +5,12 @@ from .domain import Lecture
 
 
 class LectureRepository(Protocol):
+    def add(self, lecture: Lecture) -> Lecture: ...
 
-    def add(self, lecture: Lecture) -> Lecture:
-        ...
-
-    def get_by_id(self, lecture_id: UUID) -> Lecture | None:
-        ...
+    def get_by_id(self, lecture_id: UUID) -> Lecture | None: ...
 
 
 class InMemoryLectureRepository:
-
     def __init__(self):
         self._lectures: dict[UUID, Lecture] = {}
 

@@ -23,9 +23,7 @@ app.include_router(
 
 @app.get("/health")
 def health_check():
-    return {
-        "status": "ok"
-    }
+    return {"status": "ok"}
 
 
 @app.exception_handler(LectureNotFoundError)
@@ -35,10 +33,9 @@ async def lecture_not_found_handler(
 ):
     return JSONResponse(
         status_code=404,
-        content={
-            "detail": str(exc)
-        },
+        content={"detail": str(exc)},
     )
+
 
 app.include_router(
     ingestion_router,

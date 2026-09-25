@@ -45,9 +45,6 @@ def test_get_missing_lecture():
 
     lecture_id = uuid4()
 
-    response = client.get(
-        f"/api/v1/lectures/{lecture_id}"
-    )
+    response = client.get(f"/api/v1/lectures/{lecture_id}")
 
     assert response.status_code == 404
-

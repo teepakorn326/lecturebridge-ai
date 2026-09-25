@@ -25,13 +25,11 @@ class Citation:
                 60,
             )
 
-            return (
-                f"{self.filename}, "
-                f"{minutes:02d}:{seconds:02d}"
-            )
+            return f"{self.filename}, {minutes:02d}:{seconds:02d}"
 
         return self.filename
-    
+
+
 @dataclass(slots=True)
 class Chunk:
     text: str

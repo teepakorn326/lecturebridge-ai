@@ -17,16 +17,19 @@ def make_doc(segments):
 
 
 def test_small_segments_are_merged_and_keep_all_citations():
-    doc = make_doc([
-        Segment(text="Intro to attention.", page_number=1),
-        Segment(text="Query, key, value.", page_number=2),
-    ])
+    doc = make_doc(
+        [
+            Segment(text="Intro to attention.", page_number=1),
+            Segment(text="Query, key, value.", page_number=2),
+        ]
+    )
 
     chunks = ChunkingService(max_chars=1200).chunk_document(doc)
 
-    assert len(chunks) == 1                       
+    assert len(chunks) == 1
     citations = chunks[0].citations
-    assert [c.page_number for c in citations] == [1, 2]  
+    assert [c.page_number for c in citations] == [1, 2]
+
 
 def test_long_segment_is_split_with_overlap():
     service = ChunkingService(
@@ -34,10 +37,7 @@ def test_long_segment_is_split_with_overlap():
         overlap_chars=150,
     )
 
-    text = "".join(
-        str(i % 10)
-        for i in range(3000)
-    )
+    text = "".join(str(i % 10) for i in range(3000))
 
     document = CanonicalDocument(
         filename="lecture.pdf",
@@ -54,26 +54,13 @@ def test_long_segment_is_split_with_overlap():
 
     assert len(chunks) > 1
 
-    assert (
-        chunks[0].text[-150:]
-        == chunks[1].text[:150]
-    )
+    assert chunks[0].text[-150:] == chunks[1].text[:150]
 
-    assert all(
-        len(chunk.citations) == 1
-        for chunk in chunks
-    )
+    assert all(len(chunk.citations) == 1 for chunk in chunks)
 
-    assert all(
-        chunk.citations[0].filename
-        == "lecture.pdf"
-        for chunk in chunks
-    )
+    assert all(chunk.citations[0].filename == "lecture.pdf" for chunk in chunks)
 
-    assert all(
-        chunk.citations[0].page_number == 3
-        for chunk in chunks
-    )
+    assert all(chunk.citations[0].page_number == 3 for chunk in chunks)
 
 
 def test_no_chunk_exceeds_max_chars():
@@ -113,7 +100,8 @@ def test_no_chunk_exceeds_max_chars():
 
     assert all(
         len(chunk.text)
-        <= 1200 + max(
+        <= 1200
+        + max(
             0,
             len(chunk.citations) - 1,
         )

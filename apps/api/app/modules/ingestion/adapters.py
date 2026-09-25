@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from .domain import CanonicalDocument , Segment, SourceType, SourceFile
+from .domain import CanonicalDocument, Segment, SourceType, SourceFile
 import pymupdf
 from pptx import Presentation
 import re
 
-class SourceAdapter(ABC):
 
+class SourceAdapter(ABC):
     @abstractmethod
     def parse(
         self,
@@ -14,41 +14,35 @@ class SourceAdapter(ABC):
     ) -> CanonicalDocument:
         pass
 
-class TXTAdapter(SourceAdapter):
 
+class TXTAdapter(SourceAdapter):
     def parse(
         self,
         source: SourceFile,
     ) -> CanonicalDocument:
 
-        text = source.path.read_text(
-            encoding="utf-8"
-        ).strip()
+        text = source.path.read_text(encoding="utf-8").strip()
 
         segments = []
 
         if text:
-            segments.append(
-                Segment(text=text)
-            )
+            segments.append(Segment(text=text))
 
         return CanonicalDocument(
             filename=source.original_filename,
             source_type=SourceType.TXT,
             segments=segments,
         )
-    
-class PDFAdapter(SourceAdapter):
 
+
+class PDFAdapter(SourceAdapter):
     def parse(
         self,
         source: SourceFile,
     ) -> CanonicalDocument:
 
         try:
-            document = pymupdf.open(
-                source.path
-            )
+            document = pymupdf.open(source.path)
 
             segments = []
 
@@ -56,9 +50,7 @@ class PDFAdapter(SourceAdapter):
                 document,
                 start=1,
             ):
-                text = page.get_text(
-                    "text"
-                ).strip()
+                text = page.get_text("text").strip()
 
                 if text:
                     segments.append(
@@ -81,6 +73,7 @@ class PDFAdapter(SourceAdapter):
                 f"Failed to parse {source.original_filename}"
             ) from exc
 
+
 class DocumentParsingError(Exception):
     pass
 
@@ -88,16 +81,14 @@ class DocumentParsingError(Exception):
 class UnsupportedSourceTypeError(Exception):
     pass
 
-class AdapterFactory:
 
+class AdapterFactory:
     @staticmethod
     def get_adapter(
         source: SourceFile,
     ) -> SourceAdapter:
 
-        extension = (
-            source.path.suffix.lower()
-        )
+        extension = source.path.suffix.lower()
 
         if extension == ".txt":
             return TXTAdapter()
@@ -107,24 +98,20 @@ class AdapterFactory:
 
         if extension == ".pptx":
             return PPTXAdapter()
-        
+
         if extension == ".vtt":
             return VTTAdapter()
 
-        raise UnsupportedSourceTypeError(
-            f"Unsupported source type: {extension}"
-        )
+        raise UnsupportedSourceTypeError(f"Unsupported source type: {extension}")
+
 
 class PPTXAdapter(SourceAdapter):
-
     def parse(
         self,
         source: SourceFile,
     ) -> CanonicalDocument:
 
-        presentation = Presentation(
-            source.path
-        )
+        presentation = Presentation(source.path)
 
         segments = []
 
@@ -132,11 +119,9 @@ class PPTXAdapter(SourceAdapter):
             presentation.slides,
             start=1,
         ):
-
             texts = []
 
             for shape in slide.shapes:
-
                 text = getattr(
                     shape,
                     "text",
@@ -146,9 +131,7 @@ class PPTXAdapter(SourceAdapter):
                 if text:
                     texts.append(text)
 
-            combined_text = "\n".join(
-                texts
-            )
+            combined_text = "\n".join(texts)
 
             if not combined_text:
                 continue
@@ -165,22 +148,18 @@ class PPTXAdapter(SourceAdapter):
             source_type=SourceType.PPTX,
             segments=segments,
         )
+
+
 def timestamp_to_seconds(
     value: str,
 ) -> float:
 
-    hours, minutes, seconds = (
-        value.split(":")
-    )
+    hours, minutes, seconds = value.split(":")
 
-    return (
-        int(hours) * 3600
-        + int(minutes) * 60
-        + float(seconds)
-    )
+    return int(hours) * 3600 + int(minutes) * 60 + float(seconds)
+
 
 class VTTAdapter(SourceAdapter):
-
     TIMESTAMP_PATTERN = re.compile(
         r"(\d{2}:\d{2}:\d{2}\.\d{3})"
         r"\s+-->\s+"
@@ -192,9 +171,7 @@ class VTTAdapter(SourceAdapter):
         source: SourceFile,
     ) -> CanonicalDocument:
 
-        content = source.path.read_text(
-            encoding="utf-8"
-        )
+        content = source.path.read_text(encoding="utf-8")
 
         lines = content.splitlines()
 
@@ -205,70 +182,39 @@ class VTTAdapter(SourceAdapter):
         current_text = []
 
         for raw_line in lines:
-
             line = raw_line.strip()
 
-            match = (
-                self.TIMESTAMP_PATTERN.match(
-                    line
-                )
-            )
+            match = self.TIMESTAMP_PATTERN.match(line)
 
             if match:
-
                 if current_text:
-
                     segments.append(
                         Segment(
-                            text=" ".join(
-                                current_text
-                            ),
-                            timestamp_start=(
-                                current_start
-                            ),
-                            timestamp_end=(
-                                current_end
-                            ),
+                            text=" ".join(current_text),
+                            timestamp_start=(current_start),
+                            timestamp_end=(current_end),
                         )
                     )
 
                     current_text = []
 
-                current_start = (
-                    timestamp_to_seconds(
-                        match.group(1)
-                    )
-                )
+                current_start = timestamp_to_seconds(match.group(1))
 
-                current_end = (
-                    timestamp_to_seconds(
-                        match.group(2)
-                    )
-                )
+                current_end = timestamp_to_seconds(match.group(2))
 
                 continue
 
-            if (
-                not line
-                or line == "WEBVTT"
-            ):
+            if not line or line == "WEBVTT":
                 continue
 
             current_text.append(line)
 
         if current_text:
-
             segments.append(
                 Segment(
-                    text=" ".join(
-                        current_text
-                    ),
-                    timestamp_start=(
-                        current_start
-                    ),
-                    timestamp_end=(
-                        current_end
-                    ),
+                    text=" ".join(current_text),
+                    timestamp_start=(current_start),
+                    timestamp_end=(current_end),
                 )
             )
 

@@ -74,7 +74,6 @@ async def parse_many(
     results = []
 
     for file in files:
-
         try:
             source = await stage_upload(file)
 

@@ -1,5 +1,6 @@
 # app/core/errors.py
 
+
 class AppError(Exception):
     """Base ของ error ทุกตัวที่ "คาดไว้แล้ว" ในระบบ"""
 
@@ -13,10 +14,7 @@ class NotFoundError(AppError):
 
 
 class LectureNotFoundError(NotFoundError):
-
     def __init__(self, lecture_id):
         self.lecture_id = lecture_id
 
-        super().__init__(
-            f"Lecture '{lecture_id}' was not found"
-        )
+        super().__init__(f"Lecture '{lecture_id}' was not found")

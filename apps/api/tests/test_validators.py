@@ -5,7 +5,7 @@ from app.modules.ingestion.validators import (
     validate_file_size,
     validate_filename,
     UnsupportedFileTypeError,
-    FileTooLargeError
+    FileTooLargeError,
 )
 
 

@@ -1,5 +1,11 @@
 from app.modules.ingestion.adapters import (
-    TXTAdapter,VTTAdapter,PDFAdapter,DocumentParsingError,PPTXAdapter,AdapterFactory,UnsupportedSourceTypeError
+    TXTAdapter,
+    VTTAdapter,
+    PDFAdapter,
+    DocumentParsingError,
+    PPTXAdapter,
+    AdapterFactory,
+    UnsupportedSourceTypeError,
 )
 from app.modules.ingestion.domain import (
     SourceFile,
@@ -29,27 +35,16 @@ def test_txt_adapter(tmp_path):
 
     adapter = TXTAdapter()
 
-    document = adapter.parse(
-        source
-    )
+    document = adapter.parse(source)
 
-    assert document.filename == (
-        "lecture.txt"
-    )
+    assert document.filename == ("lecture.txt")
 
-    assert (
-        document.source_type
-        == SourceType.TXT
-    )
+    assert document.source_type == SourceType.TXT
 
-    assert len(
-        document.segments
-    ) == 1
+    assert len(document.segments) == 1
 
-    assert (
-        document.segments[0].text
-        == "Attention mechanism."
-    )
+    assert document.segments[0].text == "Attention mechanism."
+
 
 def test_vtt_adapter(tmp_path):
 
@@ -86,11 +81,12 @@ Today we study attention.
     assert first.timestamp_start == 1.0
     assert first.timestamp_end == 4.0
 
+
 def test_pdf_adapter(tmp_path):
     # สร้าง PDF 2 หน้าแบบ programmatic
     pdf_path = tmp_path / "lecture.pdf"
 
-    doc = pymupdf.open()                      # PDF เปล่า
+    doc = pymupdf.open()  # PDF เปล่า
     page1 = doc.new_page()
     page1.insert_text((72, 72), "Gradient descent basics")
     page2 = doc.new_page()
@@ -104,9 +100,10 @@ def test_pdf_adapter(tmp_path):
 
     assert document.source_type == SourceType.PDF
     assert len(document.segments) == 2
-    assert document.segments[0].page_number == 1        # ← citation ต้องรอด!
+    assert document.segments[0].page_number == 1  # ← citation ต้องรอด!
     assert "Gradient descent" in document.segments[0].text
     assert document.segments[1].page_number == 2
+
 
 def test_pdf_adapter_corrupted_file(tmp_path):
     bad_path = tmp_path / "broken.pdf"
@@ -117,17 +114,18 @@ def test_pdf_adapter_corrupted_file(tmp_path):
     with pytest.raises(DocumentParsingError):
         PDFAdapter().parse(source)
 
+
 def test_pptx_adapter(tmp_path):
     pptx_path = tmp_path / "lecture.pptx"
 
     prs = Presentation()
-    blank = prs.slide_layouts[6]              # layout เปล่า
+    blank = prs.slide_layouts[6]  # layout เปล่า
 
     slide1 = prs.slides.add_slide(blank)
     box = slide1.shapes.add_textbox(Inches(1), Inches(1), Inches(4), Inches(1))
     box.text_frame.text = "Attention mechanism"
 
-    slide2 = prs.slides.add_slide(blank)      # สไลด์เปล่า — ต้องถูกข้าม
+    slide2 = prs.slides.add_slide(blank)  # สไลด์เปล่า — ต้องถูกข้าม
 
     slide3 = prs.slides.add_slide(blank)
     box3 = slide3.shapes.add_textbox(Inches(1), Inches(1), Inches(4), Inches(1))
@@ -139,9 +137,10 @@ def test_pptx_adapter(tmp_path):
     document = PPTXAdapter().parse(source)
 
     assert document.source_type == SourceType.PPTX
-    assert len(document.segments) == 2                 # สไลด์เปล่าถูกข้าม
+    assert len(document.segments) == 2  # สไลด์เปล่าถูกข้าม
     assert document.segments[0].slide_number == 1
-    assert document.segments[1].slide_number == 3      # ← ไม่ใช่ 2!
+    assert document.segments[1].slide_number == 3  # ← ไม่ใช่ 2!
+
 
 def test_factory_selects_adapter_by_extension(tmp_path):
     txt = SourceFile(path=tmp_path / "a.txt", original_filename="a.txt")
